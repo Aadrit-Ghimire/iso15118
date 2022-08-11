@@ -173,17 +173,17 @@ class SessionStateMachine(ABC):
                         - V2GMessage according to the ISO 15118-20 standard
 
         Raises:
-            MessageProcessingError, FaultyStateImplementationError,
+            InvalidV2GTPMessageError, FaultyStateImplementationError,
             EXIDecodingError
         """
         # Step 1
         try:
             # First extract the V2GMessage payload from the V2GTPMessage ...
+            # and then decode the bytearray into the message
             v2gtp_msg = V2GTPMessage.from_bytes(self.comm_session.protocol, message)
         except InvalidV2GTPMessageError as exc:
             logger.exception("Incoming TCPPacket is not a valid V2GTPMessage")
-            # and then decode the bytearray into the message
-            raise MessageProcessingError from exc
+            raise exc
 
         # Step 2
         decoded_message: Union[
@@ -198,6 +198,12 @@ class SessionStateMachine(ABC):
             decoded_message = EXI().from_exi(
                 v2gtp_msg.payload, self.get_exi_ns(v2gtp_msg.payload_type)
             )
+
+            logger.trace(
+                f"{v2gtp_msg.payload.hex()}:::"
+                f"{self.get_exi_ns(v2gtp_msg.payload_type).value}"
+            )
+
         except EXIDecodingError as exc:
             logger.exception(f"{exc}")
             raise exc
@@ -478,6 +484,7 @@ class V2GCommunicationSession(SessionStateMachine):
                 MessageProcessingError,
                 FaultyStateImplementationError,
                 EXIDecodingError,
+                InvalidV2GTPMessageError,
             ) as exc:
                 message_name = ""
                 additional_info = ""
@@ -486,6 +493,8 @@ class V2GCommunicationSession(SessionStateMachine):
                 if isinstance(exc, FaultyStateImplementationError):
                     additional_info = f": {exc}"
                 if isinstance(exc, EXIDecodingError):
+                    additional_info = f": {exc}"
+                if isinstance(exc, InvalidV2GTPMessageError):
                     additional_info = f": {exc}"
 
                 stop_reason: str = (

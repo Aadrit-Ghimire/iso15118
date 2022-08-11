@@ -5,11 +5,13 @@ from iso15118.shared.messages.datatypes import (
     EVSENotification,
     PVEVSECurrentRegulationTolerance,
     PVEVSEEnergyToBeDelivered,
+    PVEVSEMaxCurrent,
     PVEVSEMaxCurrentLimit,
     PVEVSEMaxPowerLimit,
     PVEVSEMaxVoltageLimit,
     PVEVSEMinCurrentLimit,
     PVEVSEMinVoltageLimit,
+    PVEVSENominalVoltage,
     PVEVSEPeakCurrentRipple,
     PVEVSEPresentCurrent,
     PVEVSEPresentVoltage,
@@ -167,7 +169,11 @@ from iso15118.shared.messages.iso15118_2.body import (
 from iso15118.shared.messages.iso15118_2.body import (
     WeldingDetectionRes as WeldingDetectionResV2,
 )
-from iso15118.shared.messages.iso15118_2.datatypes import ACEVSEStatus, AuthOptionList
+from iso15118.shared.messages.iso15118_2.datatypes import (
+    ACEVSEChargeParameter,
+    ACEVSEStatus,
+    AuthOptionList,
+)
 from iso15118.shared.messages.iso15118_2.datatypes import (
     CertificateChain as CertificateChainV2,
 )
@@ -453,19 +459,19 @@ def init_failed_responses_iso_v2() -> dict:
         ),
         CertificateInstallationReqV2: CertificateInstallationResV2(
             response_code=ResponseCodeV2.FAILED,
-            cps_cert_chain=CertificateChainV2(certificate=bytes(0)),
-            contract_cert_chain=CertificateChainV2(certificate=bytes(0)),
-            encrypted_private_key=EncryptedPrivateKey(id="", value=bytes(0)),
-            dh_public_key=DHPublicKey(id="", value=bytes(0)),
-            emaid=EMAID(value="123456789ABCDE"),
+            cps_cert_chain=CertificateChainV2(certificate=bytes(1)),
+            contract_cert_chain=CertificateChainV2(certificate=bytes(1)),
+            encrypted_private_key=EncryptedPrivateKey(id="1", value=bytes(1)),
+            dh_public_key=DHPublicKey(id="1", value=bytes(1)),
+            emaid=EMAID(id="1", value="123456789ABCDE"),
         ),
         CertificateUpdateReq: CertificateUpdateRes(
             response_code=ResponseCodeV2.FAILED,
-            cps_cert_chain=CertificateChainV2(certificate=bytes(0)),
-            contract_cert_chain=CertificateChainV2(certificate=bytes(0)),
-            encrypted_private_key=EncryptedPrivateKey(id="", value=bytes(0)),
-            dh_public_key=DHPublicKey(id="", value=bytes(0)),
-            emaid=EMAID(value="123456789ABCDE"),
+            cps_cert_chain=CertificateChainV2(certificate=bytes(1)),
+            contract_cert_chain=CertificateChainV2(certificate=bytes(1)),
+            encrypted_private_key=EncryptedPrivateKey(id="", value=bytes(1)),
+            dh_public_key=DHPublicKey(id="1", value=bytes(1)),
+            emaid=EMAID(id="1", value="123456789ABCDE"),
         ),
         PaymentDetailsReq: PaymentDetailsRes(
             response_code=ResponseCodeV2.FAILED,
@@ -475,14 +481,31 @@ def init_failed_responses_iso_v2() -> dict:
         AuthorizationReqV2: AuthorizationResV2(
             response_code=ResponseCodeV2.FAILED, evse_processing=EVSEProcessing.FINISHED
         ),
-        ChargeParameterDiscoveryReq:
-        # TODO: Need to find a way to circumvent the root_validator
-        ChargeParameterDiscoveryRes(
-            response_code=ResponseCodeV2.FAILED, evse_processing=EVSEProcessing.FINISHED
+        ChargeParameterDiscoveryReq: ChargeParameterDiscoveryRes(
+            response_code=ResponseCodeV2.FAILED,
+            evse_processing=EVSEProcessing.FINISHED,
+            ac_charge_parameter=ACEVSEChargeParameter(
+                ac_evse_status=ACEVSEStatus(
+                    notification_max_delay=0,
+                    evse_notification=EVSENotification.NONE,
+                    rcd=False,
+                ),
+                evse_nominal_voltage=PVEVSENominalVoltage(
+                    multiplier=0, value=0, unit=UnitSymbol.VOLTAGE
+                ),
+                evse_max_current=PVEVSEMaxCurrent(
+                    multiplier=0, value=0, unit=UnitSymbol.AMPERE
+                ),
+            ),
         ),
-        PowerDeliveryReqV2:
-        # TODO: Need to find a way to circumvent the root_validator
-        PowerDeliveryResV2(response_code=ResponseCodeV2.FAILED),
+        PowerDeliveryReqV2: PowerDeliveryResV2(
+            response_code=ResponseCodeV2.FAILED,
+            ac_evse_status=ACEVSEStatus(
+                notification_max_delay=0,
+                evse_notification=EVSENotification.NONE,
+                rcd=False,
+            ),
+        ),
         ChargingStatusReq: ChargingStatusRes(
             response_code=ResponseCodeV2.FAILED,
             evse_id="1234567",
@@ -599,16 +622,16 @@ def init_failed_responses_iso_v20() -> dict:
                 header=header,
                 response_code=ResponseCodeV20.FAILED,
                 evse_processing=Processing.FINISHED,
-                cps_certificate_chain=CertificateChainV20(certificate=bytes(0)),
+                cps_certificate_chain=CertificateChainV20(certificate=bytes(1)),
                 signed_installation_data=SignedInstallationData(
                     contract_cert_chain=CertificateChainV20(
-                        certificate=bytes(0),
-                        sub_certificates=SubCertificates(certificates=[bytes(0)]),
+                        certificate=bytes(1),
+                        sub_certificates=SubCertificates(certificates=[bytes(1)]),
                     ),
                     ecdh_curve=ECDHCurve.x448,
-                    dh_public_key=bytes(0),
+                    dh_public_key=bytes(1),
                     x448_encrypted_private_key=bytes(84),
-                    id="",
+                    id="1",
                 ),
                 remaining_contract_cert_chains=0,
             ),

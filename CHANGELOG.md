@@ -5,6 +5,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2022-08-08
+
+### Fixed
+- ChargeParameterDiscoveryRes must be ac_charge_parameter and not ac_ev… by @ikaratass in https://github.com/SwitchEV/iso15118/pull/99
+- Added more EXI debug (AB#2580) by @shalinnijel2 in https://github.com/SwitchEV/iso15118/pull/100
+
+## [0.8.0] - 2022-08-05
+
+### Added
+
+- makefile comments and cleanup
+- Add option to fetch CertificateInstallationRes
+- Update create_certs.sh to help testing with Keysight
+- support multiple passwords for private keys (AB#2546)
+- plug and charge authorization, basic happy path
+
+### Fixed
+
+- EXI grammar violation for failed response.
+- MessageProcessingError.init() missing 1 required positional argument: 'message_name'
+- missing parameters are added for ChargeParameterDiscoveryRes and PowerDeliveryRes
+
 ## [0.7.3] - 2022-07-15
 
 ### Fixed
